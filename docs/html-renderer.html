@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>The HTML Renderer</title>
+    <link rel="stylesheet" type="text/css" href="css/iosevka.css" />
+    <link rel="stylesheet" type="text/css" href="css/booklit.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+  </head>
+  <body>
+    <div class="page">
+      <div class="page-header">
+        <a href="index.html">Booklit</a>
+        <p class="tagline">the little static site engine that could</p>
+      </div>
+
+      <nav class="top-nav">
+        <ul>
+        
+          <li><a href="getting-started.html">Getting Started</a></li>
+        
+          <li><a href="baselit.html">Basic Functions</a></li>
+        
+          <li class="current"><a href="html-renderer.html">HTML Renderer</a></li>
+        
+          <li><a href="plugins.html">Plugins</a></li>
+        
+          <li><a href="booklit-syntax.html">Syntax</a></li>
+        
+          <li><a href="thanks.html">Thanks</a></li>
+        
+        </ul>
+      </nav>
+
+      <h1 class="section-header"><a id="html-renderer"></a><span class="section-number"><a href="html-renderer.html">3</a> </span>The HTML Renderer</h1>
+
+<p>The presentation of your content is controlled by a <em>renderer</em>. At present, there is only one, and it&#39;s probably the one you&#39;ll want to use: HTML, for generating static websites.</p><p>Booklit comes with some extremely barebones templates that don&#39;t include any styling at all. You&#39;ll probably want to change that.</p><p>The HTML renderer uses Go&#39;s built-in <a href="https://golang.org/pkg/html/template"><code>html/template</code></a> package. To override templates, create a directory for your <code>.tmpl</code> files and pass it to Booklit with the <code>--html-templates</code> flag.</p><p>The <code>--html-templates</code> flag must be passed every time you build your docs, so you may want to put it in a script:</p><div class="highlight"><pre style=""><span style="color:#c29d7c">#!/bin/bash
+</span><span style="color:#c29d7c"></span>
+booklit -i lit/index.lit -o public <span style="color:#fcc21b">\
+</span><span style="color:#fcc21b"></span>  --html-templates ./html <span style="color:#fcc21b">\
+</span><span style="color:#fcc21b"></span>  <span style="color:#fcc21b">&#34;</span>$@<span style="color:#fcc21b">&#34;</span> <span style="color:#c29d7c;font-style:italic"># forward args from script to booklit</span>
+</pre></div>
+<nav>
+  <ul>
+  
+    <li>
+      <a href="html-renderer.html#base-templates">3.1 Base Templates</a>
+
+      
+    </li>
+  
+    <li>
+      <a href="html-renderer.html#template-functions">3.2 Template Functions</a>
+
+      
+    </li>
+  
+    <li>
+      <a href="html-renderer.html#styled-content">3.3 Styled Content</a>
+
+      
+<nav>
+  <ul>
+  
+    <li>
+      <a href="html-renderer.html#styles-with-partials">3.3.1 Styles with Partials</a>
+
+      
+    </li>
+  
+  </ul>
+</nav>
+
+    </li>
+  
+    <li>
+      <a href="html-renderer.html#styled-sections">3.4 Styled Sections</a>
+
+      
+    </li>
+  
+  </ul>
+</nav>
+
+
+
+  
+    <h2 class="section-header"><a id="base-templates"></a><span class="section-number"><a href="html-renderer.html#base-templates">3.1</a> </span>Base Templates</h2>
+
+<p>The following template files will be executed if present in the HTML templates directory, with the corresponding data type as <code>.</code>:</p><table>
+  
+  <tr>
+    
+    <td>template</td>
+    
+    <td>type for <code>.</code></td>
+    
+  </tr>
+  
+  <tr>
+    
+    <td><a href="https://github.com/vito/booklit/blob/master/render/html/page.tmpl"><code>page.tmpl</code></a></td>
+    
+    <td><a href="https://pkg.go.dev/github.com/vito/booklit#Section"><code>*booklit.<strong>Section</strong></code></a></td>
+    
+  </tr>
+  
+  <tr>
+    
+    <td><a href="https://github.com/vito/booklit/blob/master/render/html/section.tmpl"><code>section.tmpl</code></a></td>
+    
+    <td><a href="https://pkg.go.dev/github.com/vito/booklit#Section"><code>*booklit.<strong>Section</strong></code></a></td>
+    
+  </tr>
+  
+  <tr>
+    
+    <td><a href="https://github.com/vito/booklit/blob/master/render/html/link.tmpl"><code>link.tmpl</code></a></td>
+    
+    <td><a href="https://pkg.go.dev/github.com/vito/booklit#Link"><code>booklit.<strong>Link</strong></code></a></td>
+    
+  </tr>
+  
+  <tr>
+    
+    <td><a href="https://github.com/vito/booklit/blob/master/render/html/list.tmpl"><code>list.tmpl</code></a></td>
+    
+    <td><a href="https://pkg.go.dev/github.com/vito/booklit#List"><code>booklit.<strong>List</strong></code></a></td>
+    
+  </tr>
+  
+  <tr>
+    
+    <td><a href="https://github.com/vito/booklit/blob/master/render/html/paragraph.tmpl"><code>paragraph.tmpl</code></a></td>
+    
+    <td><a href="https://pkg.go.dev/github.com/vito/booklit#Paragraph"><code>booklit.<strong>Paragraph</strong></code></a></td>
+    
+  </tr>
+  
+  <tr>
+    
+    <td><a href="https://github.com/vito/booklit/blob/master/render/html/preformatted.tmpl"><code>preformatted.tmpl</code></a></td>
+    
+    <td><a href="https://pkg.go.dev/github.com/vito/booklit#Preformatted"><code>booklit.<strong>Preformatted</strong></code></a></td>
+    
+  </tr>
+  
+  <tr>
+    
+    <td><a href="https://github.com/vito/booklit/blob/master/render/html/reference.tmpl"><code>reference.tmpl</code></a></td>
+    
+    <td><a href="https://pkg.go.dev/github.com/vito/booklit#Reference"><code>*booklit.<strong>Reference</strong></code></a></td>
+    
+  </tr>
+  
+  <tr>
+    
+    <td><a href="https://github.com/vito/booklit/blob/master/render/html/sequence.tmpl"><code>sequence.tmpl</code></a></td>
+    
+    <td><a href="https://pkg.go.dev/github.com/vito/booklit#Sequence"><code>booklit.<strong>Sequence</strong></code></a></td>
+    
+  </tr>
+  
+  <tr>
+    
+    <td><a href="https://github.com/vito/booklit/blob/master/render/html/string.tmpl"><code>string.tmpl</code></a></td>
+    
+    <td><a href="https://pkg.go.dev/github.com/vito/booklit#String"><code>booklit.<strong>String</strong></code></a></td>
+    
+  </tr>
+  
+  <tr>
+    
+    <td><a href="https://github.com/vito/booklit/blob/master/render/html/target.tmpl"><code>target.tmpl</code></a></td>
+    
+    <td><a href="https://pkg.go.dev/github.com/vito/booklit#Target"><code>booklit.<strong>Target</strong></code></a></td>
+    
+  </tr>
+  
+  <tr>
+    
+    <td><a href="https://github.com/vito/booklit/blob/master/render/html/toc.tmpl"><code>toc.tmpl</code></a></td>
+    
+    <td><a href="https://pkg.go.dev/github.com/vito/booklit#Section"><code>*booklit.<strong>Section</strong></code></a></td>
+    
+  </tr>
+  
+  <tr>
+    
+    <td><a href="https://github.com/vito/booklit/blob/master/render/html/aside.tmpl"><code>aside.tmpl</code></a></td>
+    
+    <td><a href="https://pkg.go.dev/github.com/vito/booklit#Aside"><code>booklit.<strong>Aside</strong></code></a></td>
+    
+  </tr>
+  
+  <tr>
+    
+    <td><a href="https://github.com/vito/booklit/blob/master/render/html/definitions.tmpl"><code>definitions.tmpl</code></a></td>
+    
+    <td><a href="https://pkg.go.dev/github.com/vito/booklit#Definitions"><code>booklit.<strong>Definitions</strong></code></a></td>
+    
+  </tr>
+  
+  <tr>
+    
+    <td><a href="https://github.com/vito/booklit/blob/master/render/html/table.tmpl"><code>table.tmpl</code></a></td>
+    
+    <td><a href="https://pkg.go.dev/github.com/vito/booklit#Table"><code>booklit.<strong>Table</strong></code></a></td>
+    
+  </tr>
+  
+  <tr>
+    
+    <td><a href="https://github.com/vito/booklit/blob/master/render/html/image.tmpl"><code>image.tmpl</code></a></td>
+    
+    <td><a href="https://pkg.go.dev/github.com/vito/booklit#Image"><code>booklit.<strong>Image</strong></code></a></td>
+    
+  </tr>
+  
+</table><p>The most impactful of these is <code>page.tmpl</code>, which is used for the top-level section for each &#34;page&#34; rendered. This is where you would place assets in <code>&lt;head&gt;</code>, for example.</p>
+
+
+  
+
+  
+    <h2 class="section-header"><a id="template-functions"></a><span class="section-number"><a href="html-renderer.html#template-functions">3.2</a> </span>Template Functions</h2>
+
+<p>Booklit executes templates with the following functions available:</p><dl>
+  
+  <dt><code>{{tag | url}}</code></dt>
+    <dd><p>generate a URL for the tag</p></dd>
+  
+  <dt><code>{{content | stripAux}}</code></dt>
+    <dd><p>strip <a href="baselit.html#aux"><code class="highlight"><span style="color:#ed6c30;font-weight:bold">\aux</span></code></a> elements from the content</p></dd>
+  
+  <dt><code>{{string | rawHTML}}</code></dt>
+    <dd><p>render the string as raw HTML, unescaped</p></dd>
+  
+  <dt><code>{{string | rawURL}}</code></dt>
+    <dd><p>permit the rendered value to be placed in a <code>url=&#34;&#34;</code> attribute</p></dd>
+  
+  <dt><code>{{content | render}}</code></dt>
+    <dd><p>render the content</p></dd>
+  
+  <dt><code>{{walkContext currentSection subSection}}</code></dt>
+    <dd><p>generate a convenience struct with fields <code>.Current</code> and <code>.Section</code>, useful for traversing a tree of sections while retaining the &#34;current&#34; section, e.g. so it can be marked as &#34;active&#34; in a navigation tree</p></dd>
+  
+  <dt><code>{{section | headerDepth}}</code></dt>
+    <dd><p>return the number that should be used for the section&#39;s header, i.e. <code>&lt;hN&gt;</code></p></dd>
+  
+</dl>
+
+
+  
+
+  
+    <h2 class="section-header"><a id="styled-content"></a><span class="section-number"><a href="html-renderer.html#styled-content">3.3</a> </span>Styled Content</h2>
+
+<p>Styled content, i.e. <a href="https://pkg.go.dev/github.com/vito/booklit#Styled"><code>booklit.<strong>Styled</strong></code></a>, instructs the HTML renderer to use the <code>*.tmpl</code> template named after the style.</p><p>For example, <a href="baselit.html#bold"><code class="highlight"><span style="color:#ed6c30;font-weight:bold">\bold</span></code></a> is implemented in the <a href="baselit.html"><code>baselit</code></a> plugin by returning:</p><div class="highlight"><pre style="">booklit.Styled{
+  Style:   booklit.StyleBold, <span style="color:#c29d7c;font-style:italic">// &#34;bold&#34;
+</span><span style="color:#c29d7c;font-style:italic"></span>  Content: content,
+}
+</pre></div><p>Booklit includes a <code>bold.tmpl</code> template which is evaluated with <code>.</code> as the <code>booklit.Styled</code> value:</p><div class="highlight"><pre style="">&lt;<span style="color:#fcc21b;font-weight:bold">strong</span>&gt;<span style="color:#c29d7c">{{</span>.Content | render<span style="color:#c29d7c">}}</span>&lt;/<span style="color:#fcc21b;font-weight:bold">strong</span>&gt;
+</pre></div><p>Thus, when content is styled with <code>&#34;bold&#34;</code>, it will render in <strong>strong tags</strong>.</p>
+
+
+  
+    <h3 class="section-header"><a id="styles-with-partials"></a><span class="section-number"><a href="html-renderer.html#styles-with-partials">3.3.1</a> </span>Styles with Partials</h3>
+
+<p>Additional content can be propagated to the template by setting it <code>Partials</code>:</p><div class="highlight"><pre style="">booklit.Styled{
+  Style:   <span style="color:#fcc21b">&#34;my-wackadoo-style&#34;</span>,
+  Content: content,
+
+  Partials: booklit.Partials{
+    <span style="color:#fcc21b">&#34;Title&#34;</span>: title,
+  },
+}
+</pre></div><p>Then, with <code>my-wackadoo-style.tmpl</code> as the following:</p><div class="highlight"><pre style="">&lt;<span style="color:#fcc21b;font-weight:bold">div</span> class=<span style="color:#fcc21b">&#34;wack&#34;</span>&gt;
+  &lt;<span style="color:#fcc21b;font-weight:bold">h1</span>&gt;<span style="color:#c29d7c">{{</span>.Partial <span style="color:#fcc21b">&#34;Title&#34;</span> | render<span style="color:#c29d7c">}}</span>&lt;/<span style="color:#fcc21b;font-weight:bold">h1</span>&gt;
+
+  <span style="color:#c29d7c">{{</span>.Content | render<span style="color:#c29d7c">}}</span>
+&lt;/<span style="color:#fcc21b;font-weight:bold">div</span>&gt;
+</pre></div><p>This would result with <code>title</code> rendered in between the <code>&lt;h1&gt;</code> tags, and <code>content</code> rendered below.</p>
+
+
+  
+
+  
+
+  
+    <h2 class="section-header"><a id="styled-sections"></a><span class="section-number"><a href="html-renderer.html#styled-sections">3.4</a> </span>Styled Sections</h2>
+
+<p>Using <a href="baselit.html#styled"><code class="highlight"><span style="color:#ed6c30;font-weight:bold">\styled</span></code></a> instructs the HTML renderer to use <code>(name).tmpl</code> instead of <code>section.tmpl</code>, or <code>(name)-page.tmpl</code> instead of <code>page.tmpl</code> (if it exists).</p><p>So, given the following example:</p><div class="lit-syntax"><div class="highlight"><pre style=""><span style="color:#ed6c30;font-weight:bold">\<a href="baselit.html#title">title</a></span>{Fancy Section}
+
+<span style="color:#ed6c30;font-weight:bold">\<a href="baselit.html#styled">styled</a></span>{fancy}
+
+I&#39;m a fancy section!
+
+<span style="color:#ed6c30;font-weight:bold">\<a href="baselit.html#section">section</a></span>{
+  <span style="color:#ed6c30;font-weight:bold">\<a href="baselit.html#title">title</a></span>{Sub-section}
+
+  I&#39;m a normal sub-section!
+}
+</pre></div></div><p>...and the following as <code>fancy.tmpl</code> under the given templates path (<code>--html-templates</code>):</p><div class="highlight"><pre style="">&lt;<span style="color:#fcc21b;font-weight:bold">div</span> class=<span style="color:#fcc21b">&#34;fancy&#34;</span>&gt;
+  &lt;<span style="color:#fcc21b;font-weight:bold">em</span>&gt;&lt;<span style="color:#fcc21b;font-weight:bold">strong</span>&gt;<span style="color:#c29d7c">{{</span>.Title | render<span style="color:#c29d7c">}}</span>&lt;/<span style="color:#fcc21b;font-weight:bold">strong</span>&gt;&lt;/<span style="color:#fcc21b;font-weight:bold">em</span>&gt;
+
+  <span style="color:#c29d7c">{{</span>.Body | render<span style="color:#c29d7c">}}</span>
+
+  <span style="color:#c29d7c">{{</span><span style="color:#ed6c30;font-weight:bold">if</span> <span style="color:#ed6c30;font-weight:bold">not</span> .SplitSections<span style="color:#c29d7c">}}</span>
+    <span style="color:#c29d7c">{{</span><span style="color:#ed6c30;font-weight:bold">range</span> .Children<span style="color:#c29d7c">}}</span>
+      <span style="color:#c29d7c">{{</span>. | render<span style="color:#c29d7c">}}</span>
+    <span style="color:#c29d7c">{{</span><span style="color:#ed6c30;font-weight:bold">end</span><span style="color:#c29d7c">}}</span>
+  <span style="color:#c29d7c">{{</span><span style="color:#ed6c30;font-weight:bold">end</span><span style="color:#c29d7c">}}</span>
+&lt;/<span style="color:#fcc21b;font-weight:bold">div</span>&gt;
+</pre></div><p>...the following will be the rendered HTML for the section:</p><div class="highlight"><pre style="">&lt;<span style="color:#fcc21b;font-weight:bold">div</span> class=<span style="color:#fcc21b">&#34;fancy&#34;</span>&gt;
+  &lt;<span style="color:#fcc21b;font-weight:bold">em</span>&gt;&lt;<span style="color:#fcc21b;font-weight:bold">strong</span>&gt;Fancy Section&lt;/<span style="color:#fcc21b;font-weight:bold">strong</span>&gt;&lt;/<span style="color:#fcc21b;font-weight:bold">em</span>&gt;
+
+  &lt;<span style="color:#fcc21b;font-weight:bold">p</span>&gt;I&#39;m a fancy section!&lt;/<span style="color:#fcc21b;font-weight:bold">p</span>&gt;
+
+  &lt;<span style="color:#fcc21b;font-weight:bold">h2</span>&gt;Sub-section&lt;/<span style="color:#fcc21b;font-weight:bold">h2</span>&gt;
+
+  &lt;<span style="color:#fcc21b;font-weight:bold">p</span>&gt;I&#39;m a normal sub-section!&lt;/<span style="color:#fcc21b;font-weight:bold">p</span>&gt;
+&lt;/<span style="color:#fcc21b;font-weight:bold">div</span>&gt;
+</pre></div><p>Note that the styling only applies to the section that declares it; it does not propagate to its children.</p>
+
+
+  
+
+  
+
+    </div>
+    <script data-goatcounter="https://booklit.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+  </body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{{.Title.String}}</title>
+    <link rel="stylesheet" type="text/css" href="css/iosevka.css" />
+    <link rel="stylesheet" type="text/css" href="css/booklit.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+  </head>
+  <body>
+    <div class="page{{if not .Parent}} top{{end}}">
+      <div class="page-header">
+        <a href="{{.Top.PrimaryTag | url}}">Booklit</a>
+        <p class="tagline">the little static site engine that could</p>
+      </div>
+
+      <nav class="top-nav">
+        <ul>
+        {{range .Top.Children}}
+          <li{{if .Contains $}} class="current"{{end}}><a href="{{.PrimaryTag | url}}">{{.Title | stripAux | render}}</a></li>
+        {{end}}
+        </ul>
+      </nav>
+
+      {{. | render}}
+    </div>
+    <script data-goatcounter="https://booklit.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+  </body>
+</html>
